@@ -14,7 +14,7 @@ import java.util.UUID;
 public interface CarService {
     UUID addCar(@Valid AddCarDto carDto);
 
-    List<GetCarDTO> getCars(@Min(1) Integer page, @Min(1) @Max(200) Integer pageSize);
+    List<GetCarDTO> getCars(@Min(0) Integer page, @Min(1) @Max(200) Integer pageSize);
 
     GetCarDTO getCar(UUID id);
 

@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -37,7 +38,8 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public GetCarDTO getCar(UUID id) {
-        return carEntiryToGetCarDTO(carRepository.findById(id).orElseThrow(
+        Optional<CarEntity> byId = carRepository.findById(id);
+        return carEntiryToGetCarDTO(byId.orElseThrow(
                 () -> new IllegalArgumentException("Car with id %s not found".formatted(id)))
         );
     }

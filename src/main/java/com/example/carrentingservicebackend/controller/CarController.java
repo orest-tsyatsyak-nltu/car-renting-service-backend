@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 @RestController
 @RequestMapping("/api/v1/cars")
 @RequiredArgsConstructor
@@ -21,7 +24,7 @@ public class CarController {
 
     private final CarService carService;
 
-    @GetMapping(produces = "application/vnd.collection+json")
+    @GetMapping
     @ApiResponse(
             responseCode = "200",
             description = "Returns cars that are at specified page with specified page size",
@@ -32,7 +35,7 @@ public class CarController {
                     )
             )
     )
-    public List<GetCarDTO> getCars(@RequestParam(required = false, defaultValue = "1")
+    public List<GetCarDTO> getCars(@RequestParam(required = false, defaultValue = "0")
                                    Integer page,
                                    @RequestParam(required = false, defaultValue = "50")
                                    Integer pageSize) {
@@ -41,7 +44,11 @@ public class CarController {
 
     @GetMapping("/{id}")
     public GetCarDTO getCar(@PathVariable UUID id) {
-        return carService.getCar(id);
+        GetCarDTO car = carService.getCar(id);
+        car.add(
+                linkTo(methodOn(CarController.class).getCar(id)).withSelfRel()
+        );
+        return car;
     }
 
     @PostMapping
