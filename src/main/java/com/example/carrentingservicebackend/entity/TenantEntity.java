@@ -1,10 +1,7 @@
 package com.example.carrentingservicebackend.entity;
 
-import com.example.carrentingservicebackend.dto.CarStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -18,15 +15,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
-@Entity(name = "CarEntity")
+@Entity(name = "Tenant")
 @Table(
-        name = "cars",
+        name = "tenants",
         uniqueConstraints = @UniqueConstraint(
-                name = "cars_registration_number_key",
-                columnNames = "registration_number"
+                name = "tenants_phone_number_key",
+                columnNames = "phone_number"
         )
 )
 @Getter
@@ -36,52 +32,33 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
-public class CarEntity {
+public class TenantEntity {
     @Id
     @Column(name = "id", nullable = false, columnDefinition="binary(16) not null")
     @GeneratedValue
     private UUID id;
 
     @Column(
-            name = "registration_number",
+            name = "fullname",
             nullable = false,
             columnDefinition = "varchar(100)"
     )
-    private String registrationNumber;
+    private String fullName;
 
     @Column(
-            name = "brand",
+            name = "address",
             nullable = false,
             columnDefinition = "varchar(100)"
     )
-    private String brand;
+    private String address;
 
     @Column(
-            name = "model",
+            name = "phone_number",
             nullable = false,
             columnDefinition = "varchar(100)"
     )
-    private String model;
+    private String phoneNumber;
 
-    @Column(
-            name = "color",
-            nullable = false,
-            columnDefinition = "varchar(100)"
-    )
-    private String color;
-
-    @Column(
-            name = "price_per_day",
-            nullable = false,
-            columnDefinition = "decimal"
-    )
-    private BigDecimal pricePerDay;
-    @Column(
-            name = "car_status",
-            nullable = false
-    )
-    @Enumerated(EnumType.STRING)
-    private CarStatus carStatus;
     @Version
     private Long version;
 }
