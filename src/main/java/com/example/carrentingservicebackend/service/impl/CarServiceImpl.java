@@ -27,6 +27,7 @@ public class CarServiceImpl implements CarService {
     private final ModelMapper modelMapper;
 
     @Override
+    @Transactional
     public UUID addCar(AddCarDto carDto) {
         throwExceptionIfExist(carDto);
         CarEntity car = modelMapper.map(carDto, CarEntity.class);

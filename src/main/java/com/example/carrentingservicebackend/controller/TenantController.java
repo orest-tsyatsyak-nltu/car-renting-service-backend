@@ -1,6 +1,9 @@
 package com.example.carrentingservicebackend.controller;
 
-import com.example.carrentingservicebackend.dto.*;
+import com.example.carrentingservicebackend.dto.AddTenantDTO;
+import com.example.carrentingservicebackend.dto.GetTenantDTO;
+import com.example.carrentingservicebackend.dto.UpdateTenantDTO;
+import com.example.carrentingservicebackend.service.TenantService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -11,16 +14,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @RestController
 @RequestMapping("/api/v1/tenants")
 @RequiredArgsConstructor
 public class TenantController {
+
+    private final TenantService tenantService;
 
     @GetMapping
     @Operation(description = "Returns tenants at specified page with specified page size. Page count starts from 0.")
@@ -38,7 +40,7 @@ public class TenantController {
                                          Integer page,
                                          @RequestParam(required = false, defaultValue = "50")
                                          Integer pageSize) {
-        return new LinkedList<>();
+        return tenantService.getTenants(page, pageSize);
     }
 
     @GetMapping("/{tenantIdentifier}")
@@ -60,7 +62,7 @@ public class TenantController {
             )
     )
     public GetTenantDTO getTenant(@PathVariable String tenantIdentifier) {
-        return null;
+        return tenantService.getTenant(tenantIdentifier);
     }
 
     @PostMapping
@@ -85,8 +87,8 @@ public class TenantController {
                     schema = @Schema(implementation = ExceptionResponse.class)
             )
     )
-    public UUID registerTenant(@RequestBody AddTenantDTO addCarDto) {
-        return UUID.randomUUID();
+    public UUID registerTenant(@RequestBody AddTenantDTO addTenantDto) {
+        return tenantService.registerTenant(addTenantDto);
     }
 
     @PutMapping("/{tenantIdentifier}")
@@ -99,6 +101,7 @@ public class TenantController {
             description = "Means that tenant was updated and all given parameters were changed"
     )
     public void updateTenant(@PathVariable String tenantIdentifier, @RequestBody UpdateTenantDTO updateTenantDTO) {
+        tenantService.updateTenant(tenantIdentifier, updateTenantDTO);
     }
 
     @DeleteMapping("/{tenantIdentifier}")
@@ -111,7 +114,7 @@ public class TenantController {
             description = "Means that tenant was deleted, or there was no tenant with such identifier"
     )
     public boolean deleteTenant(@PathVariable String tenantIdentifier) {
-        return true;
+        return tenantService.deleteTenant(tenantIdentifier);
     }
 
 }

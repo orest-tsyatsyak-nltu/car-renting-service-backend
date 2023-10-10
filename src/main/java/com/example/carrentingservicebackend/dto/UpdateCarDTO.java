@@ -1,12 +1,10 @@
 package com.example.carrentingservicebackend.dto;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 
 @Data
-@EqualsAndHashCode
 public class UpdateCarDTO {
     private String brand;
     private String model;

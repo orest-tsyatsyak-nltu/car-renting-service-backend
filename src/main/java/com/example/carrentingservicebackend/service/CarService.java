@@ -17,7 +17,7 @@ public interface CarService {
 
     List<GetCarDTO> getCars(@Min(0) Integer page, @Min(1) @Max(200) Integer pageSize);
 
-    GetCarDTO getCar(String id);
+    GetCarDTO getCar(String identifier);
 
     void updateCar(String carIdentifier, UpdateCarDTO carUpdates);
 
