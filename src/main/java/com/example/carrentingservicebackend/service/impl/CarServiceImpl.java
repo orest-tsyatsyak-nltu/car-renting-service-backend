@@ -3,9 +3,12 @@ package com.example.carrentingservicebackend.service.impl;
 import com.example.carrentingservicebackend.dto.AddCarDto;
 import com.example.carrentingservicebackend.dto.CarStatus;
 import com.example.carrentingservicebackend.dto.GetCarDTO;
+import com.example.carrentingservicebackend.dto.UpdateCarDTO;
 import com.example.carrentingservicebackend.entity.CarEntity;
+import com.example.carrentingservicebackend.exception.NotFoundException;
 import com.example.carrentingservicebackend.repository.CarRepository;
 import com.example.carrentingservicebackend.service.CarService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageRequest;
@@ -25,9 +28,21 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public UUID addCar(AddCarDto carDto) {
+        throwExceptionIfExist(carDto);
         CarEntity car = modelMapper.map(carDto, CarEntity.class);
         car.setCarStatus(CarStatus.AVAILABLE);
         return carRepository.save(car).getId();
+    }
+
+    private void throwExceptionIfExist(AddCarDto carDto) {
+        String registrationNumber = carDto.getRegistrationNumber();
+        try {
+            getCar(registrationNumber);
+            throw new IllegalArgumentException(
+                    "Car with registration number %s already exists".formatted(registrationNumber)
+            );
+        } catch (NotFoundException ignored) {
+        }
     }
 
     @Override
@@ -36,16 +51,62 @@ public class CarServiceImpl implements CarService {
                 .map(this::carEntiryToGetCarDTO).toList();
     }
 
-    @Override
-    public GetCarDTO getCar(UUID id) {
-        Optional<CarEntity> byId = carRepository.findById(id);
-        return carEntiryToGetCarDTO(byId.orElseThrow(
-                () -> new IllegalArgumentException("Car with id %s not found".formatted(id)))
-        );
-    }
-
     private GetCarDTO carEntiryToGetCarDTO(CarEntity car) {
         return modelMapper.map(car, GetCarDTO.class);
+    }
+
+    @Override
+    public GetCarDTO getCar(String identifier) {
+        return carEntiryToGetCarDTO(getRowCar(identifier));
+    }
+
+    private CarEntity getRowCar(String identifier) {
+        Optional<CarEntity> car;
+        try{
+            car = carRepository.findById(UUID.fromString(identifier));
+        } catch (IllegalArgumentException e) {
+            car = carRepository.findByRegistrationNumber(identifier);
+        }
+        return car.orElseThrow(
+                        () -> new NotFoundException("Car with identifier %s not found".formatted(identifier))
+                );
+    }
+
+    @Override
+    @Transactional
+    public void updateCar(String carIdentifier, UpdateCarDTO carUpdates) {
+        CarEntity car = getRowCar(carIdentifier);
+        if(carUpdates.getBrand() != null) {
+            car.setBrand(carUpdates.getBrand());
+        }
+        if(carUpdates.getModel() != null) {
+            car.setModel(carUpdates.getModel());
+        }
+        if(carUpdates.getColor() != null) {
+            car.setColor(carUpdates.getColor());
+        }
+        if(carUpdates.getPricePerDay() != null) {
+            car.setPricePerDay(carUpdates.getPricePerDay());
+        }
+        if(carUpdates.getCarStatus() != null) {
+            car.setCarStatus(carUpdates.getCarStatus());
+        }
+        carRepository.flush();
+    }
+
+    @Override
+    @Transactional
+    public boolean deleteCar(String carIdentifier) {
+        try {
+            CarEntity car = getRowCar(carIdentifier);
+            carRepository.delete(car);
+            carRepository.flush();
+            return true;
+        } catch (NotFoundException e) {
+            return true;
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
 }

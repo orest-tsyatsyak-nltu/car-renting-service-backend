@@ -2,12 +2,15 @@ package com.example.carrentingservicebackend.controller;
 
 import com.example.carrentingservicebackend.dto.AddCarDto;
 import com.example.carrentingservicebackend.dto.GetCarDTO;
+import com.example.carrentingservicebackend.dto.UpdateCarDTO;
 import com.example.carrentingservicebackend.service.CarService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +28,7 @@ public class CarController {
     private final CarService carService;
 
     @GetMapping
+    @Operation(description = "Returns cars at specified page with specified page size. Page count starts from 0.")
     @ApiResponse(
             responseCode = "200",
             description = "Returns cars that are at specified page with specified page size",
@@ -42,18 +46,81 @@ public class CarController {
         return carService.getCars(page, pageSize);
     }
 
-    @GetMapping("/{id}")
-    public GetCarDTO getCar(@PathVariable UUID id) {
-        GetCarDTO car = carService.getCar(id);
+    @GetMapping("/{carIdentifier}")
+    @Operation(description = "Returns car by specified id or registration number. Returns 404 if no car was found")
+    @ApiResponse(
+            responseCode = "200",
+            description = "Returns car with specified car id or car registration number",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = GetCarDTO.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Car with specified car id or car registration number was not found",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ExceptionResponse.class)
+            )
+    )
+    public GetCarDTO getCar(@PathVariable String carIdentifier) {
+        GetCarDTO car = carService.getCar(carIdentifier);
         car.add(
-                linkTo(methodOn(CarController.class).getCar(id)).withSelfRel()
+                linkTo(methodOn(CarController.class).getCar(carIdentifier)).withSelfRel()
         );
         return car;
     }
 
     @PostMapping
+    @Operation(
+            description = "Adds given car to database. Returns 400 if car with given registration number already exists"
+    )
+    @ResponseStatus(HttpStatus.CREATED)
+    @ApiResponse(
+            responseCode = "201",
+            description = "Returns car with specified car id or car registration number",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = GetCarDTO.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Means that registration number already exist",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ExceptionResponse.class)
+            )
+    )
     public UUID addCar(@RequestBody AddCarDto addCarDto) {
         return carService.addCar(addCarDto);
+    }
+
+    @PutMapping("/{carIdentifier}")
+    @Operation(
+            description = "Updates car with given identifier with data from UpdateCarDTO." +
+                    " If UpdateCarDTO has null fields then that specific field will not be effected"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Means that car was updated and all given parameters were changed"
+    )
+    public void updateCar(@PathVariable String carIdentifier, @RequestBody UpdateCarDTO updateCarDTO) {
+        carService.updateCar(carIdentifier, updateCarDTO);
+    }
+
+    @DeleteMapping("/{carIdentifier}")
+    @Operation(
+            description = "Deletes car with given identifier, returns true if car was deleted," +
+                    " or there was no car with such identifier, false if something gone wrong"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Means that car was deleted, or there was no car with such identifier"
+    )
+    public boolean deleteCar(@PathVariable String carIdentifier) {
+        return carService.deleteCar(carIdentifier);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.example.carrentingservicebackend.controller;
 
+import com.example.carrentingservicebackend.exception.NotFoundException;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.Generated;
 import org.springframework.core.convert.ConversionFailedException;
@@ -43,6 +44,28 @@ public class ExceptionHandlerController {
         return ExceptionResponse.builder()
                 .withMessage(e.getMessage())
                 .withHttpStatus(HttpStatus.BAD_REQUEST)
+                .withDate(LocalDateTime.now())
+                .build();
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionResponse handleConversionFailedException(
+            IllegalArgumentException e) {
+        return ExceptionResponse.builder()
+                .withMessage(e.getMessage())
+                .withHttpStatus(HttpStatus.BAD_REQUEST)
+                .withDate(LocalDateTime.now())
+                .build();
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionResponse handleConversionFailedException(
+            NotFoundException e) {
+        return ExceptionResponse.builder()
+                .withMessage(e.getMessage())
+                .withHttpStatus(HttpStatus.NOT_FOUND)
                 .withDate(LocalDateTime.now())
                 .build();
     }
