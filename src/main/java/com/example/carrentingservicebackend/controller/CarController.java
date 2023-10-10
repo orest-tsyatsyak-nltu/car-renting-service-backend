@@ -79,10 +79,10 @@ public class CarController {
     @ResponseStatus(HttpStatus.CREATED)
     @ApiResponse(
             responseCode = "201",
-            description = "Returns car with specified car id or car registration number",
+            description = "Returns id of car that was added",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = GetCarDTO.class)
+                    schema = @Schema(implementation = UUID.class)
             )
     )
     @ApiResponse(
