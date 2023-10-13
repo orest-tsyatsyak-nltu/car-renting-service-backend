@@ -73,7 +73,7 @@ public class RentRecordController {
 
     @PostMapping
     @Operation(
-            description = "Adds given rent record to database."
+            description = "Adds given rent record to database and deletes rent with given rent identifier."
     )
     @ResponseStatus(HttpStatus.CREATED)
     @ApiResponse(

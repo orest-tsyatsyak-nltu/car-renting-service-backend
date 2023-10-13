@@ -10,15 +10,16 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
 @RequestMapping("/api/v1/cars")
@@ -66,10 +67,15 @@ public class CarController {
     )
     public GetCarDTO getCar(@PathVariable String carIdentifier) {
         GetCarDTO car = carService.getCar(carIdentifier);
-        car.add(
-                linkTo(methodOn(CarController.class).getCar(carIdentifier)).withSelfRel()
-        );
+        car.add(getLinksForCar(car));
         return car;
+    }
+
+    private List<Link> getLinksForCar(GetCarDTO car){
+        return List.of(
+                linkTo(methodOn(CarController.class).getCar(car.getId().toString())).withSelfRel(),
+                linkTo(methodOn(CarController.class).addCar(null)).withRel("add-car")
+        );
     }
 
     @PostMapping
@@ -93,8 +99,8 @@ public class CarController {
                     schema = @Schema(implementation = ExceptionResponse.class)
             )
     )
-    public UUID addCar(@RequestBody AddCarDTO addCarDto) {
-        return carService.addCar(addCarDto);
+    public ResponseEntity<UUID> addCar(@RequestBody AddCarDTO addCarDto) {
+        return ResponseEntity.status(HttpStatus.CREATED.value()).body(carService.addCar(addCarDto));
     }
 
     @PutMapping("/{carIdentifier}")
