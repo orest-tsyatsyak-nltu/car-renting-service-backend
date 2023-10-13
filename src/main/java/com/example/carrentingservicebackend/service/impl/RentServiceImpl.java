@@ -34,6 +34,7 @@ public class RentServiceImpl implements RentService {
     @Transactional
     public UUID registerRent(AddRentDTO rentDto) {
         throwExceptionIfExist(rentDto);
+        throwExceptionIfRentDateIsAfterReturnDate(rentDto);
         RentEntity rent = modelMapper.map(rentDto, RentEntity.class);
         rent.setFinalPrice(calculateFinalPrice(rent));
         return rentRepository.save(rent).getId();
@@ -47,6 +48,12 @@ public class RentServiceImpl implements RentService {
                     "Car with registration number %s is already in rent".formatted(registrationNumber)
             );
         } catch (NotFoundException ignored) {
+        }
+    }
+
+    private void throwExceptionIfRentDateIsAfterReturnDate(AddRentDTO rentDto) {
+        if(rentDto.getRentDate().isAfter(rentDto.getReturnDate())) {
+            throw new IllegalArgumentException("Rent date can not be after return date.");
         }
     }
 

@@ -49,16 +49,16 @@ public class CarServiceImpl implements CarService {
     @Override
     public List<GetCarDTO> getCars(Integer page, Integer pageSize) {
         return carRepository.findAll(PageRequest.of(page, pageSize)).get()
-                .map(this::carEntiryToGetCarDTO).toList();
+                .map(this::carEntityToGetCarDTO).toList();
     }
 
-    private GetCarDTO carEntiryToGetCarDTO(CarEntity car) {
+    private GetCarDTO carEntityToGetCarDTO(CarEntity car) {
         return modelMapper.map(car, GetCarDTO.class);
     }
 
     @Override
     public GetCarDTO getCar(String identifier) {
-        return carEntiryToGetCarDTO(getRowCar(identifier));
+        return carEntityToGetCarDTO(getRowCar(identifier));
     }
 
     private CarEntity getRowCar(String identifier) {
