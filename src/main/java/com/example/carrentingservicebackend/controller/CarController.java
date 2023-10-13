@@ -1,6 +1,6 @@
 package com.example.carrentingservicebackend.controller;
 
-import com.example.carrentingservicebackend.dto.AddCarDto;
+import com.example.carrentingservicebackend.dto.AddCarDTO;
 import com.example.carrentingservicebackend.dto.GetCarDTO;
 import com.example.carrentingservicebackend.dto.UpdateCarDTO;
 import com.example.carrentingservicebackend.service.CarService;
@@ -93,7 +93,7 @@ public class CarController {
                     schema = @Schema(implementation = ExceptionResponse.class)
             )
     )
-    public UUID addCar(@RequestBody AddCarDto addCarDto) {
+    public UUID addCar(@RequestBody AddCarDTO addCarDto) {
         return carService.addCar(addCarDto);
     }
 

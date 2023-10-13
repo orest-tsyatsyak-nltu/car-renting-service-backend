@@ -8,7 +8,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-public class AddCarDto {
+public class AddCarDTO {
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     @NotBlank

@@ -1,11 +1,6 @@
 package com.example.carrentingservicebackend.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -20,7 +15,13 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity(name = "RentEntity")
-@Table(name = "rents")
+@Table(
+        name = "rents",
+        uniqueConstraints = @UniqueConstraint(
+                name = "car_registration_number_key",
+                columnNames = "car_registration_number"
+        )
+)
 @Getter
 @Setter
 @ToString
@@ -30,7 +31,7 @@ import java.util.UUID;
 @EqualsAndHashCode
 public class RentEntity {
     @Id
-    @Column(name = "id", nullable = false, columnDefinition="binary(16) not null")
+    @Column(name = "id", nullable = false, columnDefinition = "binary(16) not null")
     @GeneratedValue
     private UUID id;
 
@@ -63,11 +64,11 @@ public class RentEntity {
     private LocalDateTime returnDate;
 
     @Column(
-            name = "final_fee",
+            name = "final_price",
             nullable = false,
             columnDefinition = "decimal"
     )
-    private BigDecimal finalFee;
+    private BigDecimal finalPrice;
 
     @Version
     private Long version;

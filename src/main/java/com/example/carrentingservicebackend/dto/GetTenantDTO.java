@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class GetTenantDTO extends RepresentationModel<GetCarDTO> {
+public class GetTenantDTO extends RepresentationModel<GetTenantDTO> {
     private UUID id;
     private String fullName;
     private String address;

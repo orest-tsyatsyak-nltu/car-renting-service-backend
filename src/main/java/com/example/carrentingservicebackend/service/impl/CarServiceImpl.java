@@ -1,6 +1,6 @@
 package com.example.carrentingservicebackend.service.impl;
 
-import com.example.carrentingservicebackend.dto.AddCarDto;
+import com.example.carrentingservicebackend.dto.AddCarDTO;
 import com.example.carrentingservicebackend.dto.CarStatus;
 import com.example.carrentingservicebackend.dto.GetCarDTO;
 import com.example.carrentingservicebackend.dto.UpdateCarDTO;
@@ -28,14 +28,14 @@ public class CarServiceImpl implements CarService {
 
     @Override
     @Transactional
-    public UUID addCar(AddCarDto carDto) {
+    public UUID addCar(AddCarDTO carDto) {
         throwExceptionIfExist(carDto);
         CarEntity car = modelMapper.map(carDto, CarEntity.class);
         car.setCarStatus(CarStatus.AVAILABLE);
         return carRepository.save(car).getId();
     }
 
-    private void throwExceptionIfExist(AddCarDto carDto) {
+    private void throwExceptionIfExist(AddCarDTO carDto) {
         String registrationNumber = carDto.getRegistrationNumber();
         try {
             getCar(registrationNumber);

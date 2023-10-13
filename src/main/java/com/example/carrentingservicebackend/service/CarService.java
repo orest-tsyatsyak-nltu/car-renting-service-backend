@@ -1,6 +1,6 @@
 package com.example.carrentingservicebackend.service;
 
-import com.example.carrentingservicebackend.dto.AddCarDto;
+import com.example.carrentingservicebackend.dto.AddCarDTO;
 import com.example.carrentingservicebackend.dto.GetCarDTO;
 import com.example.carrentingservicebackend.dto.UpdateCarDTO;
 import jakarta.validation.Valid;
@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Validated
 public interface CarService {
-    UUID addCar(@Valid AddCarDto carDto);
+    UUID addCar(@Valid AddCarDTO carDto);
 
     List<GetCarDTO> getCars(@Min(0) Integer page, @Min(1) @Max(200) Integer pageSize);
 
