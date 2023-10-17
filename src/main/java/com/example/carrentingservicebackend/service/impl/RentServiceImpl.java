@@ -1,8 +1,6 @@
 package com.example.carrentingservicebackend.service.impl;
 
-import com.example.carrentingservicebackend.dto.AddRentDTO;
-import com.example.carrentingservicebackend.dto.GetCarDTO;
-import com.example.carrentingservicebackend.dto.GetRentDTO;
+import com.example.carrentingservicebackend.dto.*;
 import com.example.carrentingservicebackend.entity.RentEntity;
 import com.example.carrentingservicebackend.exception.NotFoundException;
 import com.example.carrentingservicebackend.repository.RentRepository;
@@ -37,7 +35,9 @@ public class RentServiceImpl implements RentService {
         throwExceptionIfRentDateIsAfterReturnDate(rentDto);
         RentEntity rent = modelMapper.map(rentDto, RentEntity.class);
         rent.setFinalPrice(calculateFinalPrice(rent));
-        return rentRepository.save(rent).getId();
+        RentEntity registeredRent = rentRepository.save(rent);
+        changeCarStatus(rentDto);
+        return registeredRent.getId();
     }
 
     private void throwExceptionIfExist(AddRentDTO rentDto) {
@@ -52,7 +52,7 @@ public class RentServiceImpl implements RentService {
     }
 
     private void throwExceptionIfRentDateIsAfterReturnDate(AddRentDTO rentDto) {
-        if(rentDto.getRentDate().isAfter(rentDto.getReturnDate())) {
+        if (rentDto.getRentDate().isAfter(rentDto.getReturnDate())) {
             throw new IllegalArgumentException("Rent date can not be after return date.");
         }
     }
@@ -64,6 +64,13 @@ public class RentServiceImpl implements RentService {
                 .minusDays(rentDate.getDayOfYear()).getDayOfYear();
         GetCarDTO rentedCar = carService.getCar(rent.getCarRegistrationNumber());
         return rentedCar.getPricePerDay().multiply(BigDecimal.valueOf(daysInRent));
+    }
+
+    private void changeCarStatus(AddRentDTO rentDto) {
+        carService.updateCar(
+                rentDto.getCarRegistrationNumber(),
+                UpdateCarDTO.builder().carStatus(CarStatus.RENTED).build()
+        );
     }
 
     @Override
@@ -83,7 +90,7 @@ public class RentServiceImpl implements RentService {
 
     private RentEntity getRowRent(String identifier) {
         Optional<RentEntity> rent;
-        try{
+        try {
             rent = rentRepository.findById(UUID.fromString(identifier));
         } catch (IllegalArgumentException e) {
             rent = rentRepository.findByCarRegistrationNumber(identifier);

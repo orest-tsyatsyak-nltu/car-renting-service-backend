@@ -1,8 +1,6 @@
 package com.example.carrentingservicebackend.service.impl;
 
-import com.example.carrentingservicebackend.dto.AddRentRecordDTO;
-import com.example.carrentingservicebackend.dto.GetRentDTO;
-import com.example.carrentingservicebackend.dto.GetRentRecordDTO;
+import com.example.carrentingservicebackend.dto.*;
 import com.example.carrentingservicebackend.entity.RentRecordEntity;
 import com.example.carrentingservicebackend.exception.NotFoundException;
 import com.example.carrentingservicebackend.repository.RentRecordRepository;
@@ -27,7 +25,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RentRecordServiceImpl implements RentRecordService {
 
-    private static final long NUMBER_OF_SECONDS_IN_DAY = 86400L;
+    private static final double NUMBER_OF_SECONDS_IN_DAY = 86400D;
 
     private final RentRecordRepository rentRecordRepository;
 
@@ -54,6 +52,7 @@ public class RentRecordServiceImpl implements RentRecordService {
         rentRecordEntity.setTotalPayment(calculateTotalPayment(rent, delayInDays));
 
         rentService.deleteRent(rent.getCarRegistrationNumber());
+        freeTheCar(rentRecordDto, rent);
 
         return rentRecordRepository.save(rentRecordEntity).getId();
     }
@@ -62,7 +61,7 @@ public class RentRecordServiceImpl implements RentRecordService {
         ZoneOffset zoneOffset = ZoneId.systemDefault().getRules().getOffset(now);
         long nowSeconds = now.toInstant(zoneOffset).getEpochSecond();
         long returnSeconds = rent.getReturnDate().toInstant(zoneOffset).getEpochSecond();
-        return (int) ((nowSeconds - returnSeconds) / NUMBER_OF_SECONDS_IN_DAY);
+        return Math.toIntExact(Math.round((nowSeconds - returnSeconds) / NUMBER_OF_SECONDS_IN_DAY));
     }
 
     private BigDecimal calculateTotalPayment(GetRentDTO rent, Integer delayInDays) {
@@ -71,6 +70,17 @@ public class RentRecordServiceImpl implements RentRecordService {
         }
         BigDecimal carPricePerDay = carService.getCar(rent.getCarRegistrationNumber()).getPricePerDay();
         return rent.getFinalPrice().add(carPricePerDay.multiply(BigDecimal.valueOf(delayInDays)));
+    }
+
+    private void freeTheCar(AddRentRecordDTO rentRecordDto, GetRentDTO rent) {
+        CarStatus returnCarStatus = rentRecordDto.getReturnCarStatus();
+        if(returnCarStatus.equals(CarStatus.RENTED)) {
+            throw new IllegalArgumentException("When returning car from rent you can not set car`s status to rented.");
+        }
+        carService.updateCar(
+                rent.getCarRegistrationNumber(),
+                UpdateCarDTO.builder().carStatus(returnCarStatus).build()
+        );
     }
 
     @Override

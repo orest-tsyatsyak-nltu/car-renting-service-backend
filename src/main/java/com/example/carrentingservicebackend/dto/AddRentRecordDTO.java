@@ -11,4 +11,8 @@ public class AddRentRecordDTO {
     @NotNull
     @NotBlank
     private String rentIdentifier;
+
+    @Schema(allowableValues = {"AVAILABLE", "MAINTENANCE"})
+    private CarStatus returnCarStatus;
+
 }
